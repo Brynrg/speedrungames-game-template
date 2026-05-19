@@ -4,82 +4,86 @@ You are iterating on a game that ships to `speedrungames.net/games/<slug>/`. Thi
 
 ## What you start with
 
-A Vite + TypeScript scaffold with these pieces already wired:
+A Vite + TypeScript scaffold that consumes [speedrungames-sdk](https://github.com/Brynrg/speedrungames-sdk) for all the speedrun-specific runtime. Layout:
 
 | File | Role |
 |---|---|
-| `src/main.ts` | Entry. Wires canvas, game loop, timer, HUD, PB storage. **This is where you write your game.** |
-| `src/game.ts` | `Game` class — canvas + `requestAnimationFrame` loop with dt, DPR-aware resize. |
-| `src/speedrun.ts` | `SpeedrunTimer` class — ms-precision timer with start/pause/resume/split/finish, plus `formatTime(ms)`. |
-| `src/storage.ts` | PB persistence in `localStorage`. **You MUST change `SLUG` to your slug** (it namespaces the key). |
-| `src/ui.ts` | HUD overlay (time, PB, status text). |
-| `src/styles.css` | Theme variables + HUD/canvas styles. |
+| `src/main.ts` | Entry. Wires canvas + game loop + timer + HUD + PB storage + leaderboard. **This is where you write your game.** |
+| `src/styles.css` | Theme variables + canvas styles. HUD styles are inlined by the SDK. |
 | `index.html` | Vite entrypoint. Don't add `<script>`s here — import from `main.ts`. |
+| `speedrungames.json` | Manifest read by the umbrella for auto-discovery. **Update `slug`, `title`, `description`, `emoji`.** |
 | `vite.config.ts` | Vite config. **`base: "./"` is load-bearing** — do not remove. |
 | `netlify.toml` | Netlify build config. Defaults to `npm run build` → `dist/`. |
 | `.github/workflows/ci.yml` | Auto-runs on every PR: typecheck, build, relative-path lint. |
 
-The template deploys to a playable demo (click N targets) on day one. To build your game, replace the `// ─── Gameplay (replace this section) ───` block in `src/main.ts`.
+The SDK (`speedrungames-sdk`) provides:
+
+| Module | Imports |
+|---|---|
+| `speedrungames-sdk/timer` | `SpeedrunTimer`, `formatTime`, types `Split`, `TimerState` |
+| `speedrungames-sdk/storage` | `createStorage(slug)` → `{getPB, maybeSavePB, clearPB}` |
+| `speedrungames-sdk/hud` | `createHUD(parent)` → `{setTime, setPB, setStatus, destroy}` |
+| `speedrungames-sdk/game` | `Game` (canvas + rAF loop with dt) |
+| `speedrungames-sdk/leaderboard` | `submitRun({slug, ms, splits})`, `fetchRuns({slug?, limit?})` |
+
+## Mandatory edits before shipping
+
+1. **`src/main.ts`** — replace `SLUG = "REPLACE_ME"` with your slug. Replace the gameplay section (between `─── Gameplay` comments) with your game.
+2. **`speedrungames.json`** — replace every `REPLACE_ME` with real values. `deployUrl` is normally `https://game-<slug>.netlify.app` (your Netlify site URL).
+3. **`index.html`** — update the `<title>`.
 
 ## Hard rules
 
-1. **Change `SLUG` in `src/storage.ts`** to your slug before doing anything else. Otherwise every game on the template shares a localStorage key.
-2. **Relative asset URLs only.** Source: `./assets/foo.png`. CSS: `url(./foo.png)`. Vite handles import paths automatically; just don't write absolute `/...` paths in HTML/CSS.
-3. **Don't remove `base: "./"`** from `vite.config.ts`. The CI lint catches violations, but losing this setting is the #1 way a game breaks under the speedrungames.net proxy.
-4. **Keep CI green.** PRs that fail typecheck, build, or path lint should not merge.
-5. **No secrets in the repo.** Site is public; bundle ships to every player.
-6. **Self-contained.** Vendor what you use. No external CDNs without a fallback.
+1. **Relative asset URLs only.** Source: `./assets/foo.png`. CSS: `url(./foo.png)`. Vite handles import paths; just don't write absolute `/...` paths in HTML/CSS.
+2. **Don't remove `base: "./"`** from `vite.config.ts`. The CI lint catches it, but it's the #1 thing that breaks the speedrungames.net proxy.
+3. **Keep CI green** — typecheck, build, path lint must pass.
+4. **No secrets in the repo.** Site is public; bundle ships to every player.
+5. **Self-contained.** Vendor what you use. No external CDNs without a fallback.
+6. **Use the SDK.** Don't reinvent timer/storage/HUD. If the SDK is missing something, open a PR against [Brynrg/speedrungames-sdk](https://github.com/Brynrg/speedrungames-sdk) rather than inlining it here.
 
 ## Common tasks
 
 | Task | How |
 |---|---|
-| Run locally | `npm install` (first time) then `npm run dev` → http://localhost:5173 |
+| Run locally | `npm install` then `npm run dev` → http://localhost:5173 |
 | Production build | `npm run build` (output: `dist/`) |
 | Preview production build | `npm run preview` |
 | Typecheck | `npm run typecheck` |
 | Run path lint locally | `npm run build && npm run lint:paths` |
+| Update SDK | bump the version in `package.json`: `"speedrungames-sdk": "github:Brynrg/speedrungames-sdk#vX.Y.Z"` |
 
-## Timer API quick reference
+## SDK API quick reference
 
 ```ts
-import { SpeedrunTimer, formatTime } from "./speedrun.ts";
+// Timer
+import { SpeedrunTimer, formatTime } from "speedrungames-sdk/timer";
 const timer = new SpeedrunTimer();
-timer.start();                        // begin
-timer.split("checkpoint-1");          // record a split
-timer.pause(); timer.resume();        // pause/resume
-const ms = timer.finish();            // stop, return final ms
-timer.reset();                        // back to idle
-timer.elapsed();                      // current ms
-timer.getSplits();                    // readonly array
-timer.subscribe((ms, state) => {});   // ms ticks at rAF cadence
-formatTime(ms);                       // "01:23.456"
+timer.start();
+timer.split("checkpoint-1");
+timer.pause(); timer.resume();
+const ms = timer.finish();
+timer.subscribe((ms, state) => {});
+formatTime(ms); // "01:23.456"
+
+// PB persistence
+import { createStorage } from "speedrungames-sdk/storage";
+const storage = createStorage("my-slug");
+const pb = storage.getPB();
+const isPB = storage.maybeSavePB({ ms: 12345, achievedAt: Date.now() });
+
+// Leaderboard
+import { submitRun, fetchRuns } from "speedrungames-sdk/leaderboard";
+await submitRun({ slug: "my-slug", ms: 12345, splits });
+const runs = await fetchRuns({ slug: "my-slug", limit: 10 });
 ```
-
-## PB API quick reference
-
-```ts
-import { getPB, maybeSavePB, clearPB } from "./storage.ts";
-const pb = getPB();                                            // PersonalBest | null
-const isNewPB = maybeSavePB({ ms: 12345, achievedAt: Date.now() });
-clearPB();
-```
-
-`maybeSavePB` only writes if the new time beats the existing PB. It returns `true` when it does — handy for triggering a "New PB!" effect.
-
-## What you may NOT do without explicit approval
-
-- Rename the repo. The proxy rule on `speedrungames` points at `https://<repo-name>.netlify.app`.
-- Change the slug used in the speedrungames registry.
-- Delete or rename `netlify.toml`, `vite.config.ts`, or `tsconfig.json`.
-- Disable the CI workflow.
 
 ## Done checklist
 
-- [ ] Replaced gameplay section in `src/main.ts`
-- [ ] Updated `SLUG` in `src/storage.ts`
+- [ ] `SLUG` updated in `src/main.ts`
+- [ ] All `REPLACE_ME`s replaced in `speedrungames.json`
 - [ ] Page title updated in `index.html`
+- [ ] Gameplay section in `src/main.ts` replaced
 - [ ] `npm run build && npm run lint:paths` passes locally
 - [ ] CI green on the PR
 - [ ] Game's own Netlify deploy preview loads + plays correctly
-- [ ] Speedrungames registry entry added (in the umbrella repo)
+- [ ] Speedrungames PR opened (or auto-discovery kicked in)

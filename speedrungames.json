@@ -1,0 +1,9 @@
+{
+  "$schema": "https://speedrungames.net/schema/speedrungames.v1.json",
+  "slug": "REPLACE_ME",
+  "title": "REPLACE_ME",
+  "description": "REPLACE_ME",
+  "emoji": "🎮",
+  "deployUrl": "https://game-REPLACE_ME.netlify.app",
+  "hidden": false
+}

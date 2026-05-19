@@ -1,8 +1,6 @@
 :root {
   --bg: #0b0b10;
   --fg: #eaeaf0;
-  --accent: #ffcc00;
-  --hud-bg: rgba(0, 0, 0, 0.55);
 }
 
 html,
@@ -31,55 +29,4 @@ body {
   user-select: none;
 }
 
-.hud {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: var(--hud-bg);
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  min-width: 13ch;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  font-variant-numeric: tabular-nums;
-  pointer-events: none;
-}
-
-.hud-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  align-items: baseline;
-}
-
-.hud-label {
-  font-size: 0.7rem;
-  opacity: 0.6;
-  letter-spacing: 0.1em;
-}
-
-.hud-time {
-  font-size: 1.4rem;
-  font-weight: 600;
-}
-
-.hud-time[data-state="finished"] {
-  color: var(--accent);
-}
-
-.hud-pb {
-  margin-top: 0.25rem;
-  opacity: 0.85;
-}
-
-.hud-pb .hud-time {
-  font-size: 1rem;
-  color: var(--accent);
-}
-
-.hud-status {
-  margin-top: 0.5rem;
-  font-size: 0.8rem;
-  opacity: 0.7;
-  text-align: center;
-}
+/* HUD styles are inlined by speedrungames-sdk/hud. */

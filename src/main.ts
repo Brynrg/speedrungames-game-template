@@ -4,11 +4,16 @@
 // template deploys to a playable state on day one. REPLACE the gameplay
 // section below with your game.
 
-import { Game } from "./game.ts";
-import { SpeedrunTimer } from "./speedrun.ts";
-import { createHUD } from "./ui.ts";
-import { getPB, maybeSavePB } from "./storage.ts";
+import { Game } from "speedrungames-sdk/game";
+import { SpeedrunTimer } from "speedrungames-sdk/timer";
+import { createHUD } from "speedrungames-sdk/hud";
+import { createStorage } from "speedrungames-sdk/storage";
+import { submitRun } from "speedrungames-sdk/leaderboard";
 import "./styles.css";
+
+// CHANGE THIS to your slug (must match the slug in speedrungames.json
+// and in the speedrungames registry).
+const SLUG = "REPLACE_ME";
 
 const root = document.getElementById("app");
 if (!root) throw new Error("#app element missing in index.html");
@@ -20,8 +25,9 @@ root.appendChild(canvas);
 const hud = createHUD(root);
 const game = new Game(canvas);
 const timer = new SpeedrunTimer();
+const storage = createStorage(SLUG === "REPLACE_ME" ? "template-demo" : SLUG);
 
-const pb = getPB();
+const pb = storage.getPB();
 hud.setPB(pb?.ms ?? null);
 hud.setStatus("Click anywhere to start");
 
@@ -37,7 +43,7 @@ function newTarget(hits: number) {
   return { x: 0.1 + Math.random() * 0.8, y: 0.15 + Math.random() * 0.7, hits };
 }
 
-canvas.addEventListener("pointerdown", (e) => {
+canvas.addEventListener("pointerdown", async (e) => {
   const state = timer.getState();
   if (state === "idle" || state === "finished") {
     timer.start();
@@ -60,13 +66,14 @@ canvas.addEventListener("pointerdown", (e) => {
 
   if (target.hits >= TARGET_HITS) {
     const ms = timer.finish();
-    const isPB = maybeSavePB({
-      ms,
-      achievedAt: Date.now(),
-      splits: [...timer.getSplits()],
-    });
+    const splits = [...timer.getSplits()];
+    const isPB = storage.maybeSavePB({ ms, achievedAt: Date.now(), splits });
     if (isPB) hud.setPB(ms);
     hud.setStatus(isPB ? "New PB! Click to retry" : "Click to retry");
+    if (SLUG !== "REPLACE_ME") {
+      // Best-effort: fire-and-forget. Never blocks the player.
+      void submitRun({ slug: SLUG, ms, splits });
+    }
   } else {
     target = newTarget(target.hits);
   }
