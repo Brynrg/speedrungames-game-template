@@ -1,29 +1,20 @@
 # Netlify config for a speedrungames.net game.
-#
-# Default: ships the repo root as static files. Works for any hand-written
-# HTML/CSS/JS game with `index.html` at the root.
-#
-# Using a build tool (Vite, esbuild, webpack, etc.)?
-# 1. Uncomment `command` below and set it to your build command.
-# 2. Set `publish` to your build output dir (e.g. "dist", "build").
-# 3. In your build config, set the base path to "./" so assets resolve
-#    relative to the iframe/proxy mount, not to the site root.
-#    Vite: `base: "./"` in vite.config.ts
-#    Webpack: `output.publicPath = "./"`
-#    Parcel: `--public-url ./`
+# Default: builds with Vite. To switch to a plain-static game (just
+# an index.html at the root, no bundler), comment out `command` and
+# set `publish = "."`.
 
 [build]
-  publish = "."
-  # command = "npm ci && npm run build"
-  # publish = "dist"
+  command = "npm ci && npm run build"
+  publish = "dist"
 
 [build.environment]
-  NODE_VERSION = "22"
+  NODE_VERSION            = "22"
+  NPM_FLAGS               = "--no-audit --no-fund"
+  NEXT_TELEMETRY_DISABLED = "1"
 
-# Security headers — safe defaults for a sandboxed game.
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Frame-Options       = "SAMEORIGIN"
+    X-Frame-Options        = "SAMEORIGIN"
     X-Content-Type-Options = "nosniff"
-    Referrer-Policy       = "strict-origin-when-cross-origin"
+    Referrer-Policy        = "strict-origin-when-cross-origin"

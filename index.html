@@ -2,23 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Speed Run Games — New Game</title>
-    <style>
-      html, body { margin: 0; height: 100%; background: #0b0b10; color: #eaeaf0;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-      main { display: grid; place-items: center; height: 100%; text-align: center; padding: 2rem; }
-      h1 { font-size: clamp(1.5rem, 4vw, 2.5rem); margin: 0 0 0.5rem; }
-      p  { opacity: 0.75; margin: 0; max-width: 36ch; }
-      code { background: #1c1c24; padding: 0.15em 0.4em; border-radius: 4px; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <meta name="theme-color" content="#0b0b10" />
+    <title>Speed Run Games — Game</title>
   </head>
   <body>
-    <main>
-      <div>
-        <h1>⚡ Game scaffold ready</h1>
-        <p>Replace <code>index.html</code> with your game. Push to <code>main</code> and Netlify will redeploy automatically.</p>
-      </div>
-    </main>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
