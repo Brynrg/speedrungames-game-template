@@ -1,0 +1,13 @@
+node_modules/
+dist/
+build/
+out/
+.cache/
+.parcel-cache/
+.vite/
+.netlify/
+.env
+.env.*
+*.log
+.DS_Store
+Thumbs.db
