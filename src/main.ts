@@ -11,9 +11,9 @@ import { createStorage } from "speedrungames-sdk/storage";
 import { submitRun } from "speedrungames-sdk/leaderboard";
 import "./styles.css";
 
-// CHANGE THIS to your slug (must match the slug in speedrungames.json
-// and in the speedrungames registry).
-const SLUG = "REPLACE_ME";
+// Must match game.manifest.json#slug. `pnpm new:game` substitutes this.
+const SLUG: string = "__SLUG__";
+const UNSET_SLUG = "__SLUG__";
 
 const root = document.getElementById("app");
 if (!root) throw new Error("#app element missing in index.html");
@@ -25,7 +25,7 @@ root.appendChild(canvas);
 const hud = createHUD(root);
 const game = new Game(canvas);
 const timer = new SpeedrunTimer();
-const storage = createStorage(SLUG === "REPLACE_ME" ? "template-demo" : SLUG);
+const storage = createStorage(SLUG === UNSET_SLUG ? "template-demo" : SLUG);
 
 const pb = storage.getPB();
 hud.setPB(pb?.ms ?? null);
@@ -70,7 +70,7 @@ canvas.addEventListener("pointerdown", async (e) => {
     const isPB = storage.maybeSavePB({ ms, achievedAt: Date.now(), splits });
     if (isPB) hud.setPB(ms);
     hud.setStatus(isPB ? "New PB! Click to retry" : "Click to retry");
-    if (SLUG !== "REPLACE_ME") {
+    if (SLUG !== UNSET_SLUG) {
       // Best-effort: fire-and-forget. Never blocks the player.
       void submitRun({ slug: SLUG, ms, splits });
     }
