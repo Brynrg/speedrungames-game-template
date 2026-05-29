@@ -6,6 +6,10 @@ out/
 .parcel-cache/
 .vite/
 .netlify/
+test-results/
+playwright-report/
+blob-report/
+.playwright/
 .env
 .env.*
 *.log

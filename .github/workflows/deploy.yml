@@ -1,0 +1,41 @@
+name: Deploy to speedrungames.net
+
+# Every push to main auto-deploys this game to the portal. The slug is read
+# from game.manifest.json so this file needs no per-game editing. All deploy
+# logic lives in the portal's reusable workflow — never reimplement it here,
+# and never copy build output into the portal by hand.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  meta:
+    runs-on: ubuntu-latest
+    outputs:
+      slug: ${{ steps.read.outputs.slug }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: read
+        run: |
+          SLUG="$(node -p "require('./game.manifest.json').slug")"
+          if [ -z "$SLUG" ] || [ "$SLUG" = "__SLUG__" ]; then
+            echo "::error::game.manifest.json#slug is unset or still the placeholder."
+            exit 1
+          fi
+          echo "slug=$SLUG" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: meta
+    uses: Brynrg/speedrungames/.github/workflows/deploy-game.yml@main
+    with:
+      slug: ${{ needs.meta.outputs.slug }}
+      build-command: npm run build
+      dist-dir: dist
+      status: live
+    secrets:
+      SPEEDRUNGAMES_TOKEN: ${{ secrets.SPEEDRUNGAMES_TOKEN }}

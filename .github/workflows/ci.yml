@@ -31,3 +31,9 @@ jobs:
 
       - name: Verify dist/index.html exists
         run: test -f dist/index.html
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Smoke test
+        run: npm test
