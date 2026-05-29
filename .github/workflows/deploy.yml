@@ -18,19 +18,22 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       slug: ${{ steps.read.outputs.slug }}
+      skip: ${{ steps.read.outputs.skip }}
     steps:
       - uses: actions/checkout@v4
       - id: read
         run: |
           SLUG="$(node -p "require('./game.manifest.json').slug")"
           if [ -z "$SLUG" ] || [ "$SLUG" = "__SLUG__" ]; then
-            echo "::error::game.manifest.json#slug is unset or still the placeholder."
-            exit 1
+            echo "::notice::game.manifest.json#slug is still the placeholder — skipping deploy. Set a real slug (or run \`pnpm new:game\`) to enable auto-deploy."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "slug=$SLUG" >> "$GITHUB_OUTPUT"
           fi
-          echo "slug=$SLUG" >> "$GITHUB_OUTPUT"
 
   deploy:
     needs: meta
+    if: needs.meta.outputs.skip != 'true'
     uses: Brynrg/speedrungames/.github/workflows/deploy-game.yml@main
     with:
       slug: ${{ needs.meta.outputs.slug }}
