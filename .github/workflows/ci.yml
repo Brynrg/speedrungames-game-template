@@ -29,6 +29,9 @@ jobs:
       - name: Verify relative paths
         run: npm run lint:paths
 
+      - name: Verify no REPLACE_ME placeholders
+        run: npm run lint:placeholders
+
       - name: Verify dist/index.html exists
         run: test -f dist/index.html
 

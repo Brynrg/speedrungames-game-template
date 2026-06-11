@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "lint:paths": "node scripts/check-relative-paths.mjs",
+    "lint:placeholders": "node scripts/check-no-replace-me.mjs",
     "test": "playwright test",
     "deploy:portal": "npm run build && node scripts/deploy-portal.mjs"
   },
