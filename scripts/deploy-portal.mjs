@@ -19,7 +19,7 @@ import { existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const REPO = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const REPO = process.env.REPO_DIR || resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
 const status = flag("--status") || "live";
 const portal = resolvePortal(flag("--portal") || process.env.SPEEDRUNGAMES_PORTAL);
