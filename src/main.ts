@@ -39,6 +39,9 @@ const TARGET_HITS = 5;
 const TARGET_RADIUS_FRAC = 0.06;
 let target = { x: 0.5, y: 0.5, hits: 0 };
 
+let cachedR = -1;
+let cachedFont = "";
+
 function newTarget(hits: number) {
   return { x: 0.1 + Math.random() * 0.8, y: 0.15 + Math.random() * 0.7, hits };
 }
@@ -102,7 +105,11 @@ game.onDraw(({ ctx, width, height }) => {
   ctx.fill();
 
   ctx.fillStyle = "#0b0b10";
-  ctx.font = `bold ${Math.floor(r * 0.9)}px system-ui, sans-serif`;
+  if (r !== cachedR) {
+    cachedR = r;
+    cachedFont = `bold ${Math.floor(r * 0.9)}px system-ui, sans-serif`;
+  }
+  ctx.font = cachedFont;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(String(TARGET_HITS - target.hits), tx, ty);
