@@ -37,6 +37,7 @@ timer.subscribe((ms, state) => hud.setTime(ms, state));
 
 const TARGET_HITS = 5;
 const TARGET_RADIUS_FRAC = 0.06;
+const TWO_PI = Math.PI * 2;
 let target = { x: 0.5, y: 0.5, hits: 0 };
 
 function newTarget(hits: number) {
@@ -98,7 +99,7 @@ game.onDraw(({ ctx, width, height }) => {
 
   ctx.fillStyle = "#ffcc00";
   ctx.beginPath();
-  ctx.arc(tx, ty, r, 0, Math.PI * 2);
+  ctx.arc(tx, ty, r, 0, TWO_PI);
   ctx.fill();
 
   ctx.fillStyle = "#0b0b10";
