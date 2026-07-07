@@ -6,7 +6,7 @@
 // be resolved against speedrungames.net root, not the proxy mount,
 // and would 404. This script catches that before deploy.
 
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { readdir, readFile, stat } from "node:fs/promises";
 import { join, relative } from "node:path";
 
 const DIST = "dist";
@@ -16,28 +16,29 @@ const CSS_URL_RE = /url\(\s*["']?\/(?!\/)([^"')]*)/g;
 
 const offenders = [];
 
-function walk(dir) {
-  for (const entry of readdirSync(dir)) {
+async function walk(dir) {
+  const entries = await readdir(dir);
+  const tasks = entries.map(async (entry) => {
     const p = join(dir, entry);
-    const st = statSync(p);
+    const st = await stat(p);
     if (st.isDirectory()) {
-      walk(p);
-      continue;
+      await walk(p);
+      return;
     }
-    if (!SCAN_EXT.test(entry)) continue;
-    const content = readFileSync(p, "utf8");
-    let m;
-    while ((m = ATTR_RE.exec(content)) !== null) {
+    if (!SCAN_EXT.test(entry)) return;
+    const content = await readFile(p, "utf8");
+    for (const m of content.matchAll(ATTR_RE)) {
       offenders.push({ file: p, path: "/" + m[1] });
     }
-    while ((m = CSS_URL_RE.exec(content)) !== null) {
+    for (const m of content.matchAll(CSS_URL_RE)) {
       offenders.push({ file: p, path: "/" + m[1] });
     }
-  }
+  });
+  await Promise.all(tasks);
 }
 
 try {
-  walk(DIST);
+  await walk(DIST);
 } catch (err) {
   console.error(
     `check-relative-paths: could not scan ${DIST}/. Run \`npm run build\` first.\n  ${err.message}`,
