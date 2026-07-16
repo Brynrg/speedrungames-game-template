@@ -43,7 +43,7 @@ function newTarget(hits: number) {
   return { x: 0.1 + Math.random() * 0.8, y: 0.15 + Math.random() * 0.7, hits };
 }
 
-canvas.addEventListener("pointerdown", async (e) => {
+canvas.addEventListener("pointerdown", (e) => {
   const state = timer.getState();
   if (state === "idle" || state === "finished") {
     timer.start();
