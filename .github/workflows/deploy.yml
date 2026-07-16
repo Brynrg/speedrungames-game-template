@@ -31,7 +31,10 @@ jobs:
             echo "::notice::game.manifest.json#slug is still the placeholder — skipping deploy. Set a real slug (or run \`pnpm new:game\`) to enable auto-deploy."
             echo "skip=true" >> "$GITHUB_OUTPUT"
           else
-            echo "slug=$SLUG" >> "$GITHUB_OUTPUT"
+            EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+            echo "slug<<$EOF" >> "$GITHUB_OUTPUT"
+            echo "$SLUG" >> "$GITHUB_OUTPUT"
+            echo "$EOF" >> "$GITHUB_OUTPUT"
           fi
 
   deploy:
