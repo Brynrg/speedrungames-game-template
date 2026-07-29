@@ -22,6 +22,11 @@ import { fileURLToPath } from "node:url";
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
 const status = flag("--status") || "live";
+const ALLOWED_STATUSES = ["live", "draft"];
+if (!ALLOWED_STATUSES.includes(status)) {
+  fail(`Invalid status: "${status}". Must be one of: ${ALLOWED_STATUSES.join(", ")}`);
+}
+
 const portal = resolvePortal(flag("--portal") || process.env.SPEEDRUNGAMES_PORTAL);
 
 if (!portal) {
