@@ -39,8 +39,14 @@ const TARGET_HITS = 5;
 const TARGET_RADIUS_FRAC = 0.06;
 let target = { x: 0.5, y: 0.5, hits: 0 };
 
+function getSecureRandom() {
+  const array = new Uint32Array(1);
+  window.crypto.getRandomValues(array);
+  return array[0] / (0xffffffff + 1);
+}
+
 function newTarget(hits: number) {
-  return { x: 0.1 + Math.random() * 0.8, y: 0.15 + Math.random() * 0.7, hits };
+  return { x: 0.1 + getSecureRandom() * 0.8, y: 0.15 + getSecureRandom() * 0.7, hits };
 }
 
 canvas.addEventListener("pointerdown", async (e) => {
