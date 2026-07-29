@@ -43,6 +43,14 @@ function newTarget(hits: number) {
   return { x: 0.1 + Math.random() * 0.8, y: 0.15 + Math.random() * 0.7, hits };
 }
 
+function drawCenteredText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, font: string, color: string) {
+  ctx.fillStyle = color;
+  ctx.font = font;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(text, x, y);
+}
+
 canvas.addEventListener("pointerdown", async (e) => {
   const state = timer.getState();
   if (state === "idle" || state === "finished") {
@@ -84,11 +92,7 @@ game.onDraw(({ ctx, width, height }) => {
   ctx.fillRect(0, 0, width, height);
 
   if (timer.getState() === "idle") {
-    ctx.fillStyle = "#eaeaf0";
-    ctx.font = "20px system-ui, sans-serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText("Click anywhere to start", width / 2, height / 2);
+    drawCenteredText(ctx, "Click anywhere to start", width / 2, height / 2, "20px system-ui, sans-serif", "#eaeaf0");
     return;
   }
 
@@ -101,11 +105,7 @@ game.onDraw(({ ctx, width, height }) => {
   ctx.arc(tx, ty, r, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.fillStyle = "#0b0b10";
-  ctx.font = `bold ${Math.floor(r * 0.9)}px system-ui, sans-serif`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(String(TARGET_HITS - target.hits), tx, ty);
+  drawCenteredText(ctx, String(TARGET_HITS - target.hits), tx, ty, `bold ${Math.floor(r * 0.9)}px system-ui, sans-serif`, "#0b0b10");
 });
 
 // ─── End gameplay ───────────────────────────────────────────────────────────
