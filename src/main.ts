@@ -79,6 +79,9 @@ canvas.addEventListener("pointerdown", async (e) => {
   }
 });
 
+let cachedR = -1;
+let cachedFont = "";
+
 game.onDraw(({ ctx, width, height }) => {
   ctx.fillStyle = "#0b0b10";
   ctx.fillRect(0, 0, width, height);
@@ -102,7 +105,11 @@ game.onDraw(({ ctx, width, height }) => {
   ctx.fill();
 
   ctx.fillStyle = "#0b0b10";
-  ctx.font = `bold ${Math.floor(r * 0.9)}px system-ui, sans-serif`;
+  if (r !== cachedR) {
+    cachedR = r;
+    cachedFont = `bold ${Math.floor(r * 0.9)}px system-ui, sans-serif`;
+  }
+  ctx.font = cachedFont;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(String(TARGET_HITS - target.hits), tx, ty);
