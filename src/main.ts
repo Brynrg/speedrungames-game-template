@@ -37,6 +37,9 @@ timer.subscribe((ms, state) => hud.setTime(ms, state));
 
 const TARGET_HITS = 5;
 const TARGET_RADIUS_FRAC = 0.06;
+const COLOR_BACKGROUND = "#0b0b10";
+const COLOR_TEXT = "#eaeaf0";
+const COLOR_TARGET = "#ffcc00";
 let target = { x: 0.5, y: 0.5, hits: 0 };
 
 function newTarget(hits: number) {
@@ -80,11 +83,11 @@ canvas.addEventListener("pointerdown", async (e) => {
 });
 
 game.onDraw(({ ctx, width, height }) => {
-  ctx.fillStyle = "#0b0b10";
+  ctx.fillStyle = COLOR_BACKGROUND;
   ctx.fillRect(0, 0, width, height);
 
   if (timer.getState() === "idle") {
-    ctx.fillStyle = "#eaeaf0";
+    ctx.fillStyle = COLOR_TEXT;
     ctx.font = "20px system-ui, sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -96,12 +99,12 @@ game.onDraw(({ ctx, width, height }) => {
   const tx = target.x * width;
   const ty = target.y * height;
 
-  ctx.fillStyle = "#ffcc00";
+  ctx.fillStyle = COLOR_TARGET;
   ctx.beginPath();
   ctx.arc(tx, ty, r, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.fillStyle = "#0b0b10";
+  ctx.fillStyle = COLOR_BACKGROUND;
   ctx.font = `bold ${Math.floor(r * 0.9)}px system-ui, sans-serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
