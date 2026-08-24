@@ -15,40 +15,42 @@
 // Usage:  npm run deploy:portal -- [--status live] [--portal /path/to/speedrungames]
 
 import { execFileSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import fs from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
 const status = flag("--status") || "live";
-const portal = resolvePortal(flag("--portal") || process.env.SPEEDRUNGAMES_PORTAL);
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  const portal = resolvePortal(flag("--portal") || process.env.SPEEDRUNGAMES_PORTAL);
 
-if (!portal) {
-  fail(
-    "Could not find a speedrungames portal checkout.\n" +
-      "  Pass --portal <path>, set SPEEDRUNGAMES_PORTAL, or clone it as a sibling (../speedrungames).\n" +
-      "  Then this runs:  node <portal>/scripts/ingest-game-build.mjs --game-dir . --status " + status,
-  );
+  if (!portal) {
+    fail(
+      "Could not find a speedrungames portal checkout.\n" +
+        "  Pass --portal <path>, set SPEEDRUNGAMES_PORTAL, or clone it as a sibling (../speedrungames).\n" +
+        "  Then this runs:  node <portal>/scripts/ingest-game-build.mjs --game-dir . --status " + status,
+    );
+  }
+
+  const ingest = resolve(portal, "scripts/ingest-game-build.mjs");
+  if (!fs.existsSync(ingest)) fail(`Portal found at ${portal} but ${ingest} is missing.`);
+
+  if (!fs.existsSync(resolve(REPO, "dist/index.html"))) {
+    fail("No dist/index.html — run `npm run build` first.");
+  }
+
+  console.log(`→ Ingesting this game into ${portal} (status=${status}) ...`);
+  execFileSync("node", [ingest, "--game-dir", REPO, "--status", status], {
+    stdio: "inherit",
+  });
+  console.log("\n✓ Ingested. Commit the portal change (or let its CI open the PR).");
 }
 
-const ingest = resolve(portal, "scripts/ingest-game-build.mjs");
-if (!existsSync(ingest)) fail(`Portal found at ${portal} but ${ingest} is missing.`);
-
-if (!existsSync(resolve(REPO, "dist/index.html"))) {
-  fail("No dist/index.html — run `npm run build` first.");
-}
-
-console.log(`→ Ingesting this game into ${portal} (status=${status}) ...`);
-execFileSync("node", [ingest, "--game-dir", REPO, "--status", status], {
-  stdio: "inherit",
-});
-console.log("\n✓ Ingested. Commit the portal change (or let its CI open the PR).");
-
-function resolvePortal(p) {
+export function resolvePortal(p) {
   const candidates = [p, resolve(REPO, "..", "speedrungames")].filter(Boolean);
   for (const c of candidates) {
-    if (c && existsSync(resolve(c, "scripts/ingest-game-build.mjs"))) return resolve(c);
+    if (c && fs.existsSync(resolve(c, "scripts/ingest-game-build.mjs"))) return resolve(c);
   }
   return null;
 }
