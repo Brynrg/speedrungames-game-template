@@ -43,7 +43,12 @@ function newTarget(hits: number) {
   return { x: 0.1 + Math.random() * 0.8, y: 0.15 + Math.random() * 0.7, hits };
 }
 
-canvas.addEventListener("pointerdown", async (e) => {
+let canvasRect = canvas.getBoundingClientRect();
+window.addEventListener("resize", () => {
+  canvasRect = canvas.getBoundingClientRect();
+});
+
+canvas.addEventListener("pointerdown", (e) => {
   const state = timer.getState();
   if (state === "idle" || state === "finished") {
     timer.start();
@@ -53,10 +58,9 @@ canvas.addEventListener("pointerdown", async (e) => {
   }
   if (state !== "running") return;
 
-  const rect = canvas.getBoundingClientRect();
-  const px = (e.clientX - rect.left) / rect.width;
-  const py = (e.clientY - rect.top) / rect.height;
-  const aspect = rect.width / rect.height;
+  const px = (e.clientX - canvasRect.left) / canvasRect.width;
+  const py = (e.clientY - canvasRect.top) / canvasRect.height;
+  const aspect = canvasRect.width / canvasRect.height;
   const dx = (px - target.x) * (aspect > 1 ? 1 : aspect);
   const dy = py - target.y;
   if (Math.hypot(dx, dy) >= TARGET_RADIUS_FRAC) return;
