@@ -48,7 +48,7 @@ console.log("\n✓ Ingested. Commit the portal change (or let its CI open the PR
 function resolvePortal(p) {
   const candidates = [p, resolve(REPO, "..", "speedrungames")].filter(Boolean);
   for (const c of candidates) {
-    if (c && existsSync(resolve(c, "scripts/ingest-game-build.mjs"))) return resolve(c);
+    if (existsSync(resolve(c, "scripts/ingest-game-build.mjs"))) return resolve(c);
   }
   return null;
 }
