@@ -15,14 +15,15 @@
 // Usage:  npm run deploy:portal -- [--status live] [--portal /path/to/speedrungames]
 
 import { execFileSync } from "node:child_process";
-import { existsSync } from "node:fs";
+
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { resolvePortal } from "./resolve-portal.mjs";
 
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
 const status = flag("--status") || "live";
-const portal = resolvePortal(flag("--portal") || process.env.SPEEDRUNGAMES_PORTAL);
+const portal = resolvePortal(flag("--portal") || process.env.SPEEDRUNGAMES_PORTAL, REPO);
 
 if (!portal) {
   fail(
@@ -44,14 +45,6 @@ execFileSync("node", [ingest, "--game-dir", REPO, "--status", status], {
   stdio: "inherit",
 });
 console.log("\n✓ Ingested. Commit the portal change (or let its CI open the PR).");
-
-function resolvePortal(p) {
-  const candidates = [p, resolve(REPO, "..", "speedrungames")].filter(Boolean);
-  for (const c of candidates) {
-    if (c && existsSync(resolve(c, "scripts/ingest-game-build.mjs"))) return resolve(c);
-  }
-  return null;
-}
 
 function flag(name) {
   const i = args.indexOf(name);
