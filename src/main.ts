@@ -12,7 +12,7 @@ import { submitRun } from "speedrungames-sdk/leaderboard";
 import "./styles.css";
 
 // Must match game.manifest.json#slug. `pnpm new:game` substitutes this.
-const SLUG: string = "__SLUG__";
+const SLUG = "__SLUG__";
 const UNSET_SLUG = "__SLUG__";
 
 const root = document.getElementById("app");
