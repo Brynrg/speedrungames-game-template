@@ -9,6 +9,7 @@ import { SpeedrunTimer } from "speedrungames-sdk/timer";
 import { createHUD } from "speedrungames-sdk/hud";
 import { createStorage } from "speedrungames-sdk/storage";
 import { submitRun } from "speedrungames-sdk/leaderboard";
+import { newTarget } from "./target.ts";
 import "./styles.css";
 
 // Must match game.manifest.json#slug. `pnpm new:game` substitutes this.
@@ -39,9 +40,6 @@ const TARGET_HITS = 5;
 const TARGET_RADIUS_FRAC = 0.06;
 let target = { x: 0.5, y: 0.5, hits: 0 };
 
-function newTarget(hits: number) {
-  return { x: 0.1 + Math.random() * 0.8, y: 0.15 + Math.random() * 0.7, hits };
-}
 
 canvas.addEventListener("pointerdown", async (e) => {
   const state = timer.getState();
