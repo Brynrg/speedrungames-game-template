@@ -6,43 +6,38 @@
 // be resolved against speedrungames.net root, not the proxy mount,
 // and would 404. This script catches that before deploy.
 
-import { readdir, readFile } from "node:fs/promises";
+import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 
 const DIST = "dist";
 const SCAN_EXT = /\.(html|css|js|mjs|cjs)$/;
+const ATTR_RE = /(?:src|href)\s*=\s*["']\/(?!\/)([^"']*)/g;
+const CSS_URL_RE = /url\(\s*["']?\/(?!\/)([^"')]*)/g;
 
 const offenders = [];
 
-async function walk(dir) {
-  const entries = await readdir(dir, { withFileTypes: true });
-  const promises = entries.map(async (entry) => {
-    const p = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      await walk(p);
-      return;
+function walk(dir) {
+  for (const entry of readdirSync(dir)) {
+    const p = join(dir, entry);
+    const st = statSync(p);
+    if (st.isDirectory()) {
+      walk(p);
+      continue;
     }
-    if (!SCAN_EXT.test(entry.name)) return;
-    const content = await readFile(p, "utf8");
-
-    // Instantiate regexes locally to prevent lastIndex state contamination
-    // when executing concurrently across multiple promises.
-    const attrRe = /(?:src|href)\s*=\s*["']\/(?!\/)([^"']*)/g;
-    const cssUrlRe = /url\(\s*["']?\/(?!\/)([^"')]*)/g;
-
+    if (!SCAN_EXT.test(entry)) continue;
+    const content = readFileSync(p, "utf8");
     let m;
-    while ((m = attrRe.exec(content)) !== null) {
+    while ((m = ATTR_RE.exec(content)) !== null) {
       offenders.push({ file: p, path: "/" + m[1] });
     }
-    while ((m = cssUrlRe.exec(content)) !== null) {
+    while ((m = CSS_URL_RE.exec(content)) !== null) {
       offenders.push({ file: p, path: "/" + m[1] });
     }
-  });
-  await Promise.all(promises);
+  }
 }
 
 try {
-  await walk(DIST);
+  walk(DIST);
 } catch (err) {
   console.error(
     `check-relative-paths: could not scan ${DIST}/. Run \`npm run build\` first.\n  ${err.message}`,
