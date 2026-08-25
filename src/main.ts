@@ -12,9 +12,20 @@ import { submitRun } from "speedrungames-sdk/leaderboard";
 import { newTarget } from "./target.ts";
 import "./styles.css";
 
-// Must match game.manifest.json#slug. `pnpm new:game` substitutes this.
+// Must match game.manifest.json#slug. Set this by hand — see AGENTS.md
+// "Mandatory edits before shipping". (`pnpm new:game` substitutes
+// game.manifest.json, index.html and README.md; it does not touch this file.)
+//
+// The `: string` annotation is load-bearing: without it TS narrows SLUG to a
+// literal as soon as you set a real slug, and both comparisons below become
+// TS2367 "no overlap" errors.
 const SLUG: string = "__SLUG__";
-const UNSET_SLUG = "__SLUG__";
+// Built from two parts so a placeholder substitution pass over this file can
+// never rewrite the sentinel too. If both sides became the real slug the guard
+// would be always-true: PB storage would silently fall back to the
+// "template-demo" key and submitRun() would never fire. Same fix as the guard
+// in .github/workflows/deploy.yml.
+const UNSET_SLUG = `__${"SLUG"}__`;
 
 const root = document.getElementById("app");
 if (!root) throw new Error("#app element missing in index.html");
