@@ -43,11 +43,6 @@ function newTarget(hits: number) {
   return { x: 0.1 + Math.random() * 0.8, y: 0.15 + Math.random() * 0.7, hits };
 }
 
-let rect = canvas.getBoundingClientRect();
-window.addEventListener("resize", () => {
-  rect = canvas.getBoundingClientRect();
-});
-
 canvas.addEventListener("pointerdown", async (e) => {
   const state = timer.getState();
   if (state === "idle" || state === "finished") {
@@ -58,6 +53,7 @@ canvas.addEventListener("pointerdown", async (e) => {
   }
   if (state !== "running") return;
 
+  const rect = canvas.getBoundingClientRect();
   const px = (e.clientX - rect.left) / rect.width;
   const py = (e.clientY - rect.top) / rect.height;
   const aspect = rect.width / rect.height;
