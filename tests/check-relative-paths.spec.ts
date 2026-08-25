@@ -70,4 +70,16 @@ test.describe("check-relative-paths script", () => {
     expect(error.stderr).toContain(`${htmlPath} → /assets/style.css`);
     expect(error.stderr).toContain(`${cssPath} → /img.png`);
   });
+
+  test("succeeds and ignores protocol-relative paths", () => {
+    const distDir = join(tmpDir, "dist");
+    mkdirSync(distDir);
+
+    // These should NOT trigger the absolute path checker due to the (?!\\/) lookahead
+    writeFileSync(join(distDir, "index.html"), `<script src="//cdn.example.com/lib.js"></script>`);
+    writeFileSync(join(distDir, "style.css"), `body { background: url('//cdn.example.com/bg.png'); }`);
+
+    const output = execFileSync("node", [scriptPath], { cwd: tmpDir, encoding: "utf8" });
+    expect(output).toContain("✓ check-relative-paths: no absolute paths in dist/");
+  });
 });
