@@ -26,13 +26,15 @@ function walk(dir) {
     }
     if (!SCAN_EXT.test(entry)) continue;
     const content = readFileSync(p, "utf8");
-    let m;
-    while ((m = ATTR_RE.exec(content)) !== null) {
-      offenders.push({ file: p, path: "/" + m[1] });
-    }
-    while ((m = CSS_URL_RE.exec(content)) !== null) {
-      offenders.push({ file: p, path: "/" + m[1] });
-    }
+    findMatches(ATTR_RE, content, p);
+    findMatches(CSS_URL_RE, content, p);
+  }
+}
+
+function findMatches(regex, content, file) {
+  let m;
+  while ((m = regex.exec(content)) !== null) {
+    offenders.push({ file, path: "/" + m[1] });
   }
 }
 
