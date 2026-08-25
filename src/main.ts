@@ -54,7 +54,6 @@ const COLOR_TEXT = "#eaeaf0";
 const COLOR_TARGET = "#ffcc00";
 let target = { x: 0.5, y: 0.5, hits: 0 };
 
-
 canvas.addEventListener("pointerdown", async (e) => {
   const state = timer.getState();
   if (state === "idle" || state === "finished") {
