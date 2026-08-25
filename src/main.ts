@@ -79,10 +79,6 @@ canvas.addEventListener("pointerdown", async (e) => {
   }
 });
 
-let lastRadius = -1;
-let lastHits = -1;
-let hitString = "";
-
 game.onDraw(({ ctx, width, height }) => {
   ctx.fillStyle = "#0b0b10";
   ctx.fillRect(0, 0, width, height);
@@ -90,8 +86,6 @@ game.onDraw(({ ctx, width, height }) => {
   if (timer.getState() === "idle") {
     ctx.fillStyle = "#eaeaf0";
     ctx.font = "20px system-ui, sans-serif";
-    // Reset cache if font changes
-    lastRadius = -1;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText("Click anywhere to start", width / 2, height / 2);
@@ -108,18 +102,10 @@ game.onDraw(({ ctx, width, height }) => {
   ctx.fill();
 
   ctx.fillStyle = "#0b0b10";
-  if (r !== lastRadius) {
-    lastRadius = r;
-    ctx.font = `bold ${Math.floor(r * 0.9)}px system-ui, sans-serif`;
-  }
+  ctx.font = `bold ${Math.floor(r * 0.9)}px system-ui, sans-serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-
-  if (lastHits !== target.hits) {
-    lastHits = target.hits;
-    hitString = String(TARGET_HITS - target.hits);
-  }
-  ctx.fillText(hitString, tx, ty);
+  ctx.fillText(String(TARGET_HITS - target.hits), tx, ty);
 });
 
 // ─── End gameplay ───────────────────────────────────────────────────────────
